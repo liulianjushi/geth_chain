@@ -1,0 +1,65 @@
+version: '3'
+services:
+    miner:
+        image: "ethereum/client-go:latest"
+        container_name: miner
+
+        networks:
+            ethnet:
+                ipv4_address: "172.18.0.50"
+        volumes:
+            - /etc/localtime:/etc/localtime
+            - /etc/timezone:/etc/timezone
+            # - /home/zhaoliu/vegchain/miner/data:/root/data
+            - /home/zhaoliu/vegchain/init:/workspace
+        ports:
+            - "7545:7545"
+            - "30303:30303/udp"
+            - "30303:30303"
+        entrypoint: 
+            - /workspace/init.sh
+        stdin_open: true
+        tty: true
+        command: /workspace/mine.sh
+        restart: always
+    node1:
+        image: "ethereum/client-go:latest"
+        container_name: node1
+        depends_on:
+            - "miner"
+        networks:
+            ethnet:
+                ipv4_address: "172.18.0.51"
+        entrypoint: 
+            - /workspace/init.sh
+        volumes:
+            - /etc/localtime:/etc/localtime
+            - /etc/timezone:/etc/timezone
+            # - /home/zhaoliu/vegchain/node1/data:/root/data
+            - /home/zhaoliu/vegchain/init:/workspace
+        stdin_open: true
+        tty: true
+        command: /workspace/node.sh
+        restart: always
+    node2:
+        image: "ethereum/client-go:latest"
+        container_name: node2
+        depends_on:
+            - "miner"
+        entrypoint: 
+            - /workspace/init.sh
+        networks:
+            ethnet:
+                ipv4_address: "172.18.0.52"
+        volumes:
+            - /etc/localtime:/etc/localtime
+            - /etc/timezone:/etc/timezone
+            # - /home/zhaoliu/vegchain/node2/data:/root/data
+            - /home/zhaoliu/vegchain/init:/workspace
+        stdin_open: true
+        tty: true
+        command: /workspace/node.sh
+        restart: always
+networks:
+    ethnet:
+        external: true
